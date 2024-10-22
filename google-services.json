@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "956988198053",
+    "project_id": "walawe-if570-c-uts",
+    "storage_bucket": "walawe-if570-c-uts.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956988198053:android:66218802ced3f8ec1b514c",
+        "android_client_info": {
+          "package_name": "com.example.uts_lec"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASRZstbMn2vg4Ax5de1u3v8j3O59PMrbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
