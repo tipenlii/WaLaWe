@@ -129,7 +129,7 @@ fun SignInScreen(navController: NavHostController) {
                         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    navController.navigate("home")
+                                    navController.navigate("umur")
                                 } else {
                                     Toast.makeText(navController.context, "Sign In Failed", Toast.LENGTH_SHORT).show()
                                 }

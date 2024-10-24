@@ -14,5 +14,9 @@ fun SetupNavGraph(navController: NavHostController) {
         composable("sign_in") { SignInScreen(navController = navController) }
         composable("sign_up") { SignUpScreen(navController = navController) }
         composable("home") { HomeScreen(navController = navController) }
+        composable("Umur") { GenderAndAgeSelectionScreen(navController = navController) }
+        composable("Badan") {HeightAndWeightSelectionScreen(navController = navController) }
+        composable("Goal") {GoalSelectionScreen(navController = navController) }
+        composable("Perkenalan") {IntroductionScreen(navController = navController) }
     }
 }
