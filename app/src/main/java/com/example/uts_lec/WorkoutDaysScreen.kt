@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,7 +20,8 @@ import androidx.navigation.NavController
 
 @Composable
 fun WorkoutDaysScreen(navController: NavController, category: String) {
-    var completedDays by remember { mutableStateOf(1) } // Hari yang sudah selesai, default Day 1 terbuka
+    val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
+    var completedDays by rememberSaveable { mutableStateOf(savedStateHandle?.get("completedDays") ?: 1) } // Hari yang sudah selesai, default Day 1 terbuka
 
     // Gunakan Box untuk menampilkan background image dan konten utama
     Box(
@@ -54,19 +56,21 @@ fun WorkoutDaysScreen(navController: NavController, category: String) {
             WorkoutDayItem(
                 day = 1,
                 isUnlocked = true, // Hari pertama selalu terbuka
+                isCompleted = completedDays > 1, // Hari pertama dianggap selesai jika completedDays lebih dari 1
                 description = "Ready to build a strong foundation for your $category muscles? This beginner-friendly $category workout is perfect for those just starting their fitness journey.",
                 onStartClick = {
-                    navController.navigate("workout_detail_screen/1") // Navigasi ke workout detail screen untuk Day 1
+                    navController.navigate("workout_detail_screen/1/$category") // Navigasi ke workout detail screen untuk Day 1
                 }
             )
 
             WorkoutDayItem(
                 day = 2,
                 isUnlocked = completedDays >= 2, // Terbuka jika hari 1 sudah selesai
+                isCompleted = completedDays > 2,
                 description = "This beginner $category workout is perfect if you're looking to improve both your strength and posture.",
                 onStartClick = {
                     if (completedDays >= 2) {
-                        navController.navigate("workout_detail_screen/2") // Navigasi ke workout detail screen untuk Day 2
+                        navController.navigate("workout_detail_screen/2/$category") // Navigasi ke workout detail screen untuk Day 2
                     }
                 }
             )
@@ -74,10 +78,11 @@ fun WorkoutDaysScreen(navController: NavController, category: String) {
             WorkoutDayItem(
                 day = 3,
                 isUnlocked = completedDays >= 3, // Terbuka jika hari 2 sudah selesai
+                isCompleted = completedDays > 3,
                 description = "No gym? No problem! This beginner $category workout can be done anywhere, with no equipment needed.",
                 onStartClick = {
                     if (completedDays >= 3) {
-                        navController.navigate("workout_detail_screen/3") // Navigasi ke workout detail screen untuk Day 3
+                        navController.navigate("workout_detail_screen/3/$category") // Navigasi ke workout detail screen untuk Day 3
                     }
                 }
             )
@@ -85,10 +90,11 @@ fun WorkoutDaysScreen(navController: NavController, category: String) {
             WorkoutDayItem(
                 day = 4,
                 isUnlocked = completedDays >= 4, // Terbuka jika hari 3 sudah selesai
+                isCompleted = completedDays > 4,
                 description = "No gym? No problem! This beginner $category workout can be done anywhere, with no equipment needed.",
                 onStartClick = {
                     if (completedDays >= 4) {
-                        navController.navigate("workout_detail_screen/4") // Navigasi ke workout detail screen untuk Day 4
+                        navController.navigate("workout_detail_screen/4/$category") // Navigasi ke workout detail screen untuk Day 4
                     }
                 }
             )
@@ -96,11 +102,11 @@ fun WorkoutDaysScreen(navController: NavController, category: String) {
     }
 }
 
-
 @Composable
 fun WorkoutDayItem(
     day: Int,
     isUnlocked: Boolean,
+    isCompleted: Boolean,
     description: String,
     onStartClick: () -> Unit
 ) {
@@ -142,14 +148,24 @@ fun WorkoutDayItem(
                     textAlign = TextAlign.Justify // Menambahkan alignment justify
                 )
 
-                // Tombol "Start Now" hanya muncul jika hari tersebut terbuka
+                // Tombol "Start Now" atau tanda "Done"
                 if (isUnlocked) {
-                    Button(
-                        onClick = onStartClick,
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0A74DA), contentColor = Color.White),
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        Text(text = "Start Now")
+                    if (isCompleted) {
+                        Text(
+                            text = "Done",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Green,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    } else {
+                        Button(
+                            onClick = onStartClick,
+                            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF0A74DA), contentColor = Color.White),
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text(text = "Start Now")
+                        }
                     }
                 } else {
                     // Menampilkan ikon terkunci jika hari masih terkunci

@@ -19,9 +19,10 @@ fun SetupNavGraph(navController: NavHostController) {
         composable("Goal") {GoalSelectionScreen(navController = navController) }
         composable("Perkenalan") {IntroductionScreen(navController = navController) }
         composable("workout") { WorkoutCategoryScreen(navController = navController) }
-        composable("workout_detail_screen/{day}") { backStackEntry ->
+        composable("workout_detail_screen/{day}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
-            WorkoutDetailScreen(navController = navController, day = day)
+            val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
+            WorkoutDetailScreen(navController = navController, day = day, category = category)
         }
         composable("workout_days_screen/{category}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
@@ -31,18 +32,22 @@ fun SetupNavGraph(navController: NavHostController) {
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
             TutorialScreen(navController = navController, exerciseNumber = exerciseNumber)
         }
-        composable("transition_screen/{exerciseNumber}/{workoutName}") { backStackEntry ->
+        composable("transition_screen/{day}/{exerciseNumber}/{workoutName}/{category}") { backStackEntry ->
+            val day = backStackEntry.arguments?.getString("day")?.toInt() ?: 1
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
             val workoutName = backStackEntry.arguments?.getString("workoutName") ?: "Unknown"
-            TransitionWorkoutScreen(navController = navController, exerciseNumber = exerciseNumber, workoutName = workoutName)
+            val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
+            TransitionWorkoutScreen(navController = navController, day = day, exerciseNumber = exerciseNumber, workoutName = workoutName, category = category)
         }
 
-        composable("workout_screen/{exerciseNumber}/{name}/{reps}/{imageRes}/{duration}") { backStackEntry ->
+        composable("workout_screen/{day}/{exerciseNumber}/{name}/{reps}/{imageRes}/{duration}/{category}") { backStackEntry ->
+            val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
             val name = backStackEntry.arguments?.getString("name") ?: "Unknown"
             val reps = backStackEntry.arguments?.getString("reps") ?: ""
             val imageRes = backStackEntry.arguments?.getString("imageRes")?.toInt() ?: R.drawable.chest_workout
             val duration = backStackEntry.arguments?.getString("duration")?.toInt() ?: 0
+            val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
 
             val workout = Workout(
                 exerciseNumber = exerciseNumber,
@@ -52,8 +57,16 @@ fun SetupNavGraph(navController: NavHostController) {
                 duration = duration
             )
 
-            WorkoutScreen(navController = navController, workout = workout)
+            WorkoutScreen(navController = navController, workout = workout, day = day, category = category)
         }
+
+
+        composable("confirm_done_screen/{day}/{category}") { backStackEntry ->
+            val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
+            val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
+            ConfirmDoneScreen(navController = navController, day = day, category = category)
+        }
+
         composable("profile") { ProfileScreen(navController) }
         composable("updateProfile") { UpdateProfileScreen(navController) }
         composable("settings") { SettingsScreen(navController) }

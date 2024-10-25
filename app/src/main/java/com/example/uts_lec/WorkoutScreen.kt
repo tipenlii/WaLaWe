@@ -21,7 +21,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 
 @Composable
-fun WorkoutScreen(navController: NavController, workout: Workout) {
+fun WorkoutScreen(navController: NavController, workout: Workout, totalWorkouts: Int = 6, day: Int, category: String) {
     // State untuk countdown dan timer utama
     var countdown by remember { mutableStateOf(3) }
     var workoutTimer by remember { mutableStateOf(workout.duration) } // Menggunakan durasi workout
@@ -132,7 +132,13 @@ fun WorkoutScreen(navController: NavController, workout: Workout) {
                 // Tombol "Done" setelah workout selesai
                 Button(
                     onClick = {
-                        navController.popBackStack() // Kembali ke layar sebelumnya atau layar lain
+                        if (workout.exerciseNumber < totalWorkouts) {
+                            // Navigate to the next Transition screen for the next workout
+                            navController.navigate("transition_screen/$day/${workout.exerciseNumber + 1}/${workout.name}/$category")
+                        } else {
+                            // Handle the case where all workouts are completed (e.g., go to a summary screen)
+                            navController.navigate("confirm_done_screen/$day/$category") // Navigate to confirm done screen
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()

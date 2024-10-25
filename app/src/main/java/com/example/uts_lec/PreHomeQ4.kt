@@ -37,7 +37,7 @@ fun IntroductionScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ContinueButton(onClick = { navController.navigate("workout") })
+            ContinueButton(onClick = { navController.navigate("home") })
         }
     }
 }

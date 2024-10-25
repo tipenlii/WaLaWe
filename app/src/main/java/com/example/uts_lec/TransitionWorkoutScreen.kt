@@ -17,8 +17,21 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun TransitionWorkoutScreen(navController: NavController, exerciseNumber: Int, workoutName: String) {
-    // Gunakan exerciseNumber untuk menentukan urutan latihan (first, second, etc.)
+fun TransitionWorkoutScreen(navController: NavController, day: Int, exerciseNumber: Int, workoutName: String, category: String) {
+    // Define the list of workouts
+    val workouts = listOf(
+        Workout(1, "Push Up", "20 x Reps", R.drawable.pushup, 5),
+        Workout(2, "Plank", "1 Min", R.drawable.plank, 5),
+        Workout(3, "Both Side Plank", "1 Min", R.drawable.sideplank, 5),
+        Workout(4, "Abs Workout", "16 x Reps", R.drawable.abs, 5),
+        Workout(5, "Torso and Trap Workout", "8 x Reps", R.drawable.torsoandtraps, 5),
+        Workout(6, "Lower Back Exercise", "14 x Reps", R.drawable.lowerback, 5)
+    )
+
+    // Get the current workout based on exerciseNumber
+    val currentWorkout = workouts.getOrNull(exerciseNumber - 1) ?: workouts[0] // Default to first workout if not found
+
+    // Define the title for the exercise
     val exerciseTitle = when (exerciseNumber) {
         1 -> "Your First Exercise"
         2 -> "Your Second Exercise"
@@ -32,7 +45,7 @@ fun TransitionWorkoutScreen(navController: NavController, exerciseNumber: Int, w
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White) // Menambahkan latar belakang putih
+            .background(Color.White) // Add a white background
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -40,37 +53,37 @@ fun TransitionWorkoutScreen(navController: NavController, exerciseNumber: Int, w
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Teks dinamis untuk latihan keberapa
+            // Display the exercise title
             Text(
                 text = exerciseTitle,
-                fontSize = 40.sp,
+                fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF0A74DA),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Pesan yang bisa disesuaikan berdasarkan nama latihan
+            // Display a message indicating the workout
             Text(
-                text = "Get ready for your $workoutName! Let's get started!",
+                text = "Get ready for your ${currentWorkout.name}! Let's get started!",
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 24.dp),
                 color = Color.Gray
             )
 
-            // Gambar transisi
+            // Display the transition image
             Image(
-                painter = painterResource(id = R.drawable.penguin_transition), // Sesuaikan gambar transisi
+                painter = painterResource(id = R.drawable.penguin_transition),
                 contentDescription = "Penguin Exercise",
                 modifier = Modifier.size(400.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Tombol untuk memulai workout
+            // Button to start the workout
             Button(
                 onClick = {
-                    // Navigasi ke WorkoutScreen dengan parameter yang sesuai
-                    navController.navigate("workout_screen/$exerciseNumber/$workoutName")
+                    // Navigate to the workout screen with the correct workout details and day parameter
+                    navController.navigate("workout_screen/$day/${currentWorkout.exerciseNumber}/${currentWorkout.name}/${currentWorkout.reps}/${currentWorkout.imageRes}/${currentWorkout.duration}/$category")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

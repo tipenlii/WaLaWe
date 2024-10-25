@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 
 @Composable
-fun WorkoutDetailScreen(navController: NavController, day: Int) {
+fun WorkoutDetailScreen(navController: NavController, day: Int, category: String) {
     val workouts = listOf(
         Workout(
             exerciseNumber = 1,
@@ -105,7 +105,8 @@ fun WorkoutDetailScreen(navController: NavController, day: Int) {
                 onClick = {
                     if (currentWorkoutIndex.value < workouts.size) {
                         val workout = workouts[currentWorkoutIndex.value]
-                        navController.navigate("transition_screen/${currentWorkoutIndex.value + 1}/${workout.name}")
+                        // Menambahkan parameter day ke dalam navigasi
+                        navController.navigate("transition_screen/$day/${currentWorkoutIndex.value + 1}/${workout.name}/$category")
                         currentWorkoutIndex.value++ // Lanjutkan ke latihan berikutnya
                     }
                 },
@@ -122,6 +123,7 @@ fun WorkoutDetailScreen(navController: NavController, day: Int) {
         }
     }
 }
+
 
 
 @Composable

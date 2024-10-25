@@ -171,7 +171,7 @@ fun HomeScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(10.dp))
 
             // Motivational Card
-            MotivationalCard()
+            MotivationalCard(navController = navController)
         }
 
         // Bottom Navigation Bar
@@ -249,7 +249,7 @@ fun OverviewCard(value: String, title: String, iconResId: Int) {
 }
 
 @Composable
-fun MotivationalCard() {
+fun MotivationalCard(navController: NavHostController) {
     Box(
         modifier = Modifier
             .width(450.dp)
@@ -281,7 +281,7 @@ fun MotivationalCard() {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { /* TODO: Add functionality */ },
+                    onClick = { navController.navigate("workout") },
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.White),
                     shape = RoundedCornerShape(16.dp)
                 ) {
