@@ -17,6 +17,7 @@ Aplikasi UTS LEC adalah aplikasi pelacakan kebugaran dan latihan yang dibangun m
 - **OnboardingScreen**: Proses onboarding untuk pengguna baru.
 - **SignInScreen**: Layar masuk pengguna.
 - **SignUpScreen**: Layar daftar pengguna.
+- **StatisticsScreen**: Layar menjelaskan ringkasan singkat dan statistik olahraga yang telah dilakukan selama user menggunakan aplikasi
 - **HomeScreen**: Layar utama yang menampilkan kemajuan latihan dan konten motivasi.
 - **ProfileScreen**: Layar profil pengguna yang menampilkan informasi pribadi.
 - **UpdateProfileScreen**: Layar untuk memperbarui informasi profil pengguna.
