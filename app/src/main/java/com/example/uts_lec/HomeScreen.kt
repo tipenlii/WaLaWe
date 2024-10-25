@@ -20,12 +20,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import java.util.*
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavController) {
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)) {
@@ -72,7 +72,7 @@ fun HomeScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(45.dp))
+            Spacer(modifier = Modifier.height(75.dp))
 
             // Display Month and Year
             Text(
@@ -127,7 +127,7 @@ fun HomeScreen(navController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Penguin Progress Image
             Image(
@@ -163,12 +163,12 @@ fun HomeScreen(navController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
             // Overview Section
             OverviewSection()
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             // Motivational Card
             MotivationalCard(navController = navController)
@@ -187,7 +187,8 @@ fun HomeScreen(navController: NavHostController) {
                     painterResource(id = R.drawable.home_icon),
                     painterResource(id = R.drawable.statistics_icon),
                     painterResource(id = R.drawable.profile_icon)
-                )
+                ),
+                navController = navController
             )
         }
     }
@@ -249,7 +250,7 @@ fun OverviewCard(value: String, title: String, iconResId: Int) {
 }
 
 @Composable
-fun MotivationalCard(navController: NavHostController) {
+fun MotivationalCard(navController: NavController) {
     Box(
         modifier = Modifier
             .width(450.dp)
@@ -266,7 +267,7 @@ fun MotivationalCard(navController: NavHostController) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

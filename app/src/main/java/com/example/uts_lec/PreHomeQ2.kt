@@ -7,11 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,15 +20,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.uts_lec.ContinueButton
-import com.example.uts_lec.R
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun HeightAndWeightSelectionScreen(navController: NavHostController) {
     var height by remember { mutableStateOf(165) }
     var weight by remember { mutableStateOf(75) }
     val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -117,7 +114,6 @@ fun HeightAndWeightSelectionScreen(navController: NavHostController) {
                                     .padding(vertical = 8.dp)
                                     .clickable {
                                         height = h
-                                        db.collection("users").document("userId").update("height", h)
                                     },
                                 color = if (h == height) Color.Black else Color(0xFF4A90E2),
                                 fontWeight = if (h == height) FontWeight.Bold else FontWeight.Normal,
@@ -152,7 +148,6 @@ fun HeightAndWeightSelectionScreen(navController: NavHostController) {
                             .padding(horizontal = 8.dp)
                             .clickable {
                                 weight = w
-                                db.collection("users").document("userId").update("weight", w)
                             },
                         color = if (w == weight) Color.Black else Color(0xFF4A90E2),
                         fontWeight = if (w == weight) FontWeight.Bold else FontWeight.Normal,
@@ -173,7 +168,17 @@ fun HeightAndWeightSelectionScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ContinueButton(onClick = {
-                navController.navigate("Goal")// Action on continue button pressed
+                if (userId != null) {
+                    val userUpdates = hashMapOf(
+                        "height" to height,
+                        "weight" to weight
+                    )
+                    db.collection("users").document(userId)
+                        .set(userUpdates, SetOptions.merge())
+                        .addOnSuccessListener {
+                            navController.navigate("Goal")
+                        }
+                }
             })
         }
     }

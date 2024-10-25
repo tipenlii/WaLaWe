@@ -19,13 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun GoalSelectionScreen(navController: NavHostController) {
     var selectedGoal by remember { mutableStateOf("") }
     var selectedActivityLevel by remember { mutableStateOf("") }
     val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -87,8 +90,17 @@ fun GoalSelectionScreen(navController: NavHostController) {
 
             // Continue Button at the bottom
             ContinueButton(onClick = {
-                    navController.navigate("Perkenalan")
-
+                if (userId != null) {
+                    val userUpdates = hashMapOf(
+                        "goal" to selectedGoal,
+                        "activityLevel" to selectedActivityLevel
+                    )
+                    db.collection("users").document(userId)
+                        .set(userUpdates, SetOptions.merge())
+                        .addOnSuccessListener {
+                            navController.navigate("Perkenalan")
+                        }
+                }
             })
         }
     }

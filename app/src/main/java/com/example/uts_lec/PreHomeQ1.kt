@@ -3,12 +3,8 @@ package com.example.uts_lec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,15 +12,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun GenderAndAgeSelectionScreen(navController: NavHostController) {
     var selectedGender by remember { mutableStateOf("Girl") }
     var selectedAge by remember { mutableStateOf(17) }
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -39,8 +39,6 @@ fun GenderAndAgeSelectionScreen(navController: NavHostController) {
                 .height(200.dp)
                 .align(Alignment.TopCenter)
         )
-
-
 
         // "Gender" text
         Text(
@@ -70,7 +68,7 @@ fun GenderAndAgeSelectionScreen(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(180.dp)) // Kurangi height spacer ini untuk mengurangi jarak antara gender dan age
+            Spacer(modifier = Modifier.height(180.dp))
 
             GenderSelection(selectedGender = selectedGender, onGenderSelected = { gender ->
                 selectedGender = gender
@@ -81,14 +79,19 @@ fun GenderAndAgeSelectionScreen(navController: NavHostController) {
             })
 
             ContinueButton(onClick = {
-                navController.navigate("Badan") // Action on continue button pressed
+                // Simpan data ke Firestore
+                if (userId != null) {
+                    val userUpdates = hashMapOf(
+                        "gender" to selectedGender,
+                        "age" to selectedAge
+                    )
+                    db.collection("users").document(userId)
+                        .set(userUpdates, SetOptions.merge())
+                        .addOnSuccessListener {
+                            navController.navigate("Badan")
+                        }
+                }
             })
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewGenderAndAgeSelectionScreen() {
-    GenderAndAgeSelectionScreen(navController = rememberNavController())
 }

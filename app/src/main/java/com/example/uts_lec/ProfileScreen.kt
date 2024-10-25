@@ -2,22 +2,18 @@ package com.example.uts_lec
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.navigation.NavController
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,12 +25,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import com.example.uts_lec.ui.theme.UTS_LECTheme
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +40,31 @@ fun ProfileScreen(navController: NavController) {
     val secondaryBlue = colorResource(id = R.color.secondary_blue)
     val buttonBlue = colorResource(id = R.color.button_blue)
     val textBlue = colorResource(id = R.color.text_blue)
+
+    var userName by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+    var userWeight by remember { mutableStateOf(0) }
+    var userAge by remember { mutableStateOf(0) }
+    var userHeight by remember { mutableStateOf(0) }
+    var userBirthday by remember { mutableStateOf("") }
+
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            db.collection("users").document(userId).get().addOnSuccessListener { document ->
+                if (document != null) {
+                    userName = document.getString("name") ?: ""
+                    userEmail = document.getString("email") ?: ""
+                    userWeight = document.getLong("weight")?.toInt() ?: 0
+                    userAge = document.getLong("age")?.toInt() ?: 0
+                    userHeight = document.getLong("height")?.toInt() ?: 0
+                    userBirthday = document.getString("dateOfBirth") ?: ""
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -95,18 +117,18 @@ fun ProfileScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "Dedi Korbuser",
+                    userName,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
-                    "dedikorbuser@gmail.com",
+                    userEmail,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
-                    "Birthday: April 1st",
+                    "Birthday: $userBirthday", // Display the birthday
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold
@@ -125,7 +147,7 @@ fun ProfileScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ProfileStat("70 kg", "Weight")
+                ProfileStat("$userWeight kg", "Weight")
                 Divider(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -133,7 +155,7 @@ fun ProfileScreen(navController: NavController) {
                         .padding(vertical = 8.dp),
                     color = Color.White
                 )
-                ProfileStat("28", "Years Old")
+                ProfileStat("$userAge", "Years Old")
                 Divider(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -141,7 +163,7 @@ fun ProfileScreen(navController: NavController) {
                         .padding(vertical = 8.dp),
                     color = Color.White
                 )
-                ProfileStat("1.65 m", "Height")
+                ProfileStat("$userHeight m", "Height")
             }
         }
 
@@ -169,11 +191,14 @@ fun ProfileScreen(navController: NavController) {
             contentAlignment = Alignment.Center
         ) {
             BottomNavigationBar(
-                currentPage = currentPage,
-                onItemSelected = { selectedPage ->
-                    currentPage = selectedPage
-                },
-                icons = customIcons
+                currentPage = "profile",
+                onItemSelected = { /* Handle navigation item selection */ },
+                icons = listOf(
+                    painterResource(id = R.drawable.home_icon),
+                    painterResource(id = R.drawable.statistics_icon),
+                    painterResource(id = R.drawable.profile_icon)
+                ),
+                navController = navController
             )
         }
     }

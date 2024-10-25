@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,17 +19,36 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
 import com.example.uts_lec.ui.theme.UTS_LECTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdateProfileScreen(navController: NavController) {
     val fullName = remember { mutableStateOf("") }
-    val email = remember { mutableStateOf("") }
     val mobileNumber = remember { mutableStateOf("") }
     val dateOfBirth = remember { mutableStateOf("") }
-    val weight = remember { mutableStateOf("") }
-    val height = remember { mutableStateOf("") }
+    val weight = remember { mutableStateOf(0) }
+    val height = remember { mutableStateOf(0) }
     val buttonBlue = colorResource(id = R.color.button_blue)
+
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            db.collection("users").document(userId).get().addOnSuccessListener { document ->
+                if (document != null) {
+                    fullName.value = document.getString("name") ?: ""
+                    mobileNumber.value = document.getString("mobileNumber") ?: ""
+                    dateOfBirth.value = document.getString("dateOfBirth") ?: ""
+                    weight.value = document.getLong("weight")?.toInt() ?: 0
+                    height.value = document.getLong("height")?.toInt() ?: 0
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -42,7 +59,7 @@ fun UpdateProfileScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(vertical = 16.dp)
-                .clickable { /* Handle back button click */ }
+                .clickable { navController.navigateUp() }
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.arrow), // Replace with your drawable resource
@@ -73,17 +90,6 @@ fun UpdateProfileScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         RoundedInputField(
-            value = email.value,
-            onValueChange = { email.value = it },
-            label = "Email",
-            iconResId = R.drawable.pen, // Replace with your drawable resource
-            onIconClick = { /* Handle icon click */ },
-            placeholderText = "Enter New Email"
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        RoundedInputField(
             value = mobileNumber.value,
             onValueChange = { mobileNumber.value = it },
             label = "Mobile Number",
@@ -106,8 +112,8 @@ fun UpdateProfileScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         RoundedInputField(
-            value = weight.value,
-            onValueChange = { weight.value = it },
+            value = weight.value.toString(),
+            onValueChange = { weight.value = it.toIntOrNull() ?: 0 },
             label = "Weight (kg)",
             iconResId = R.drawable.pen, // Replace with your drawable resource
             onIconClick = { /* Handle icon click */ },
@@ -117,8 +123,8 @@ fun UpdateProfileScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         RoundedInputField(
-            value = height.value,
-            onValueChange = { height.value = it },
+            value = height.value.toString(),
+            onValueChange = { height.value = it.toIntOrNull() ?: 0 },
             label = "Height (m)",
             iconResId = R.drawable.pen, // Replace with your drawable resource
             onIconClick = { /* Handle icon click */ },
@@ -128,7 +134,22 @@ fun UpdateProfileScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = { /* Save changes logic here */ },
+            onClick = {
+                if (userId != null) {
+                    val userUpdates = hashMapOf(
+                        "name" to fullName.value,
+                        "mobileNumber" to mobileNumber.value,
+                        "dateOfBirth" to dateOfBirth.value,
+                        "weight" to weight.value,
+                        "height" to height.value
+                    )
+                    db.collection("users").document(userId)
+                        .set(userUpdates, SetOptions.merge())
+                        .addOnSuccessListener {
+                            navController.navigateUp()
+                        }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
