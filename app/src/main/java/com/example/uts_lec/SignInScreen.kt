@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
-import com.example.uts_lec.R
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun SignInScreen(navController: NavHostController) {
@@ -129,7 +130,7 @@ fun SignInScreen(navController: NavHostController) {
                         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    navController.navigate("umur")
+                                    checkProfileCompletion(navController)
                                 } else {
                                     Toast.makeText(navController.context, "Sign In Failed", Toast.LENGTH_SHORT).show()
                                 }
@@ -173,5 +174,92 @@ fun SignInScreen(navController: NavHostController) {
                 )
             }
         }
+    }
+}
+
+// Fungsi untuk memeriksa kelengkapan profil
+fun checkProfileCompletion(navController: NavHostController) {
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    if (userId != null) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Referensi ke dokumen pengguna
+        val userRef = db.collection("users").document(userId)
+
+        userRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    // Periksa field yang diperlukan
+                    val isProfileComplete = checkRequiredFields(documentSnapshot)
+
+                    if (isProfileComplete) {
+                        // Jika profil lengkap, arahkan ke home
+                        navController.navigate("home") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    } else {
+                        // Jika profil belum lengkap, arahkan ke halaman pengisian
+                        navigateToIncompleteProfileScreen(navController, documentSnapshot)
+                    }
+                } else {
+                    // Dokumen tidak ditemukan, arahkan ke halaman pertama pengisian profil
+                    navController.navigate("umur")
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Tangani kesalahan
+                Toast.makeText(
+                    navController.context,
+                    "Error checking profile: ${exception.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+    }
+}
+
+// Fungsi untuk memeriksa field yang diperlukan
+fun checkRequiredFields(documentSnapshot: DocumentSnapshot): Boolean {
+    // Daftar field yang harus diisi
+    val requiredFields = listOf(
+        "age",
+        "gender",
+        "height",
+        "weight",
+        "activityLevel",
+        "goal"
+    )
+
+    // Periksa apakah semua field ada dan tidak null
+    return requiredFields.all { field ->
+        documentSnapshot.contains(field) && documentSnapshot[field] != null
+    }
+}
+
+// Fungsi untuk mengarahkan ke halaman yang sesuai berdasarkan data yang belum lengkap
+fun navigateToIncompleteProfileScreen(
+    navController: NavHostController,
+    documentSnapshot: DocumentSnapshot
+) {
+    // Tentukan urutan halaman pengisian
+    val profileCompletionSteps = listOf(
+        "age" to "Umur",
+        "gender" to "Umur",
+        "height" to "Badan",
+        "weight" to "Badan",
+        "activityLevel" to "Goal",
+        "goal" to "Goal"
+    )
+
+    // Cari langkah pertama yang belum terisi
+    val nextStep = profileCompletionSteps.find { (field, _) ->
+        !documentSnapshot.contains(field) || documentSnapshot[field] == null
+    }
+
+    // Navigasi ke halaman yang sesuai
+    if (nextStep != null) {
+        navController.navigate(nextStep.second)
+    } else {
+        // Jika semua step sudah terisi (yang seharusnya tidak terjadi)
+        navController.navigate("home")
     }
 }
