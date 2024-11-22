@@ -53,6 +53,7 @@ fun BottomNavigationBar(
                             when (item) {
                                 "Home" -> navController.navigate("home")
                                 "Profile" -> navController.navigate("profile")
+                                "Statistics" -> navController.navigate("statistics")
                                 // Add other navigation actions as needed
                             }
                         }
