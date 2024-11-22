@@ -24,10 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import coil.compose.AsyncImage
 import com.example.uts_lec.ui.theme.UTS_LECTheme
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import coil3.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -195,7 +195,13 @@ fun ProfileScreen(navController: NavController) {
             ProfileOptionItem("History", Icons.Default.History, onClick = { /* Navigate to History */ }, isExpanded = false)
             ProfileOptionItem("Privacy Policy", Icons.Default.PrivacyTip, onClick = { /* Navigate to Privacy Policy */ }, isExpanded = false)
             ProfileOptionItem("Settings", Icons.Default.Settings, onClick = { navController.navigate("settings") }, isExpanded = false)
-            ProfileOptionItem("Logout", Icons.Default.ExitToApp, onClick = { /* Handle Logout */ }, isExpanded = false)
+            ProfileOptionItem("Logout", Icons.Default.ExitToApp, onClick = {
+                // Handle Logout
+                FirebaseAuth.getInstance().signOut()
+                navController.navigate("sign_in") {
+                    popUpTo("sign_in") { inclusive = true } // Clear back stack
+                }
+            }, isExpanded = false)
         }
 
         Box(
@@ -222,6 +228,7 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 }
+
 @Composable
 fun ProfileStat(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
