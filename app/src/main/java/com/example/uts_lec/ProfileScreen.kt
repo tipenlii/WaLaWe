@@ -1,11 +1,15 @@
 package com.example.uts_lec
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
@@ -15,8 +19,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.NavController
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,11 +29,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import coil.compose.AsyncImage
 import com.example.uts_lec.ui.theme.UTS_LECTheme
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,9 +53,11 @@ fun ProfileScreen(navController: NavController) {
     var userAge by remember { mutableStateOf(0) }
     var userHeight by remember { mutableStateOf(0) }
     var userBirthday by remember { mutableStateOf("") }
+    var profileImageUrl by remember { mutableStateOf("") }
 
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val storage = FirebaseStorage.getInstance()
 
     LaunchedEffect(userId) {
         if (userId != null) {
@@ -61,6 +69,20 @@ fun ProfileScreen(navController: NavController) {
                     userAge = document.getLong("age")?.toInt() ?: 0
                     userHeight = document.getLong("height")?.toInt() ?: 0
                     userBirthday = document.getString("dateOfBirth") ?: ""
+                    profileImageUrl = document.getString("profileImageUrl") ?: ""
+                }
+            }
+        }
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            coroutineScope.launch {
+                uploadImageToFirebase(uri, userId, storage, db) { newImageUrl ->
+                    profileImageUrl = newImageUrl
                 }
             }
         }
@@ -70,14 +92,13 @@ fun ProfileScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .background(MaterialTheme.colorScheme.surface)
     ) {
         TopAppBar(
             title = { Text("Back", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = buttonBlue) },
             navigationIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.arrow), // Replace with your drawable resource
+                        painter = painterResource(id = R.drawable.arrow),
                         contentDescription = "Back",
                         modifier = Modifier.size(15.dp),
                         tint = Color.Unspecified
@@ -106,13 +127,14 @@ fun ProfileScreen(navController: NavController) {
                     modifier = Modifier.padding(top = 10.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Image(
-                    painter = painterResource(R.drawable.sky),
+                AsyncImage(
+                    model = profileImageUrl,
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .border(2.dp, Color.Transparent, CircleShape),
+                        .border(2.dp, Color.Transparent, CircleShape)
+                        .clickable { launcher.launch("image/*") },
                     contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -128,7 +150,7 @@ fun ProfileScreen(navController: NavController) {
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
-                    "Birthday: $userBirthday", // Display the birthday
+                    "Birthday: $userBirthday",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold
@@ -169,38 +191,11 @@ fun ProfileScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Make sure each ProfileOptionItem has an onClick action
         ProfileOptionItem("Profile", Icons.Default.Person, onClick = { navController.navigate("updateProfile") }, isExpanded = false)
         ProfileOptionItem("History", Icons.Default.History, onClick = { /* Navigate to History */ }, isExpanded = false)
         ProfileOptionItem("Privacy Policy", Icons.Default.PrivacyTip, onClick = { /* Navigate to Privacy Policy */ }, isExpanded = false)
         ProfileOptionItem("Settings", Icons.Default.Settings, onClick = { navController.navigate("settings") }, isExpanded = false)
         ProfileOptionItem("Logout", Icons.Default.ExitToApp, onClick = { /* Handle Logout */ }, isExpanded = false)
-
-        // Add Bottom Navigation Bar here
-        var currentPage by remember { mutableStateOf("Profile") }
-        val customIcons = listOf(
-            painterResource(id = R.drawable.home_icon),
-            painterResource(id = R.drawable.statistics_icon),
-            painterResource(id = R.drawable.profile_icon)
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 15.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            BottomNavigationBar(
-                currentPage = "profile",
-                onItemSelected = { /* Handle navigation item selection */ },
-                icons = listOf(
-                    painterResource(id = R.drawable.home_icon),
-                    painterResource(id = R.drawable.statistics_icon),
-                    painterResource(id = R.drawable.profile_icon)
-                ),
-                navController = navController
-            )
-        }
     }
 }
 
@@ -219,4 +214,21 @@ fun PreviewProfileScreen() {
     UTS_LECTheme {
         ProfileScreen(navController = navController)
     }
+}
+
+suspend fun uploadImageToFirebase(
+    uri: Uri,
+    userId: String?,
+    storage: FirebaseStorage,
+    db: FirebaseFirestore,
+    onSuccess: (String) -> Unit
+) {
+    if (userId == null) return
+
+    val storageRef = storage.reference.child("profile_images/$userId.jpg")
+    storageRef.putFile(uri).await()
+    val downloadUrl = storageRef.downloadUrl.await().toString()
+
+    db.collection("users").document(userId).update("profileImageUrl", downloadUrl).await()
+    onSuccess(downloadUrl)
 }
