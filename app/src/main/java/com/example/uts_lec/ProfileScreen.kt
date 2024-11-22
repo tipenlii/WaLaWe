@@ -3,7 +3,6 @@ package com.example.uts_lec
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,11 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PrivacyTip
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.NavController
@@ -88,117 +83,145 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        TopAppBar(
-            title = { Text("Back", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = buttonBlue) },
-            navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow),
-                        contentDescription = "Back",
-                        modifier = Modifier.size(15.dp),
-                        tint = Color.Unspecified
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 56.dp) // Adjust padding to avoid overlap with the navigation bar
+        ) {
+            TopAppBar(
+                title = { Text("Back", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = buttonBlue) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrow),
+                            contentDescription = "Back",
+                            modifier = Modifier.size(15.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                }
+            )
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .background(textBlue, RoundedCornerShape(30.dp))
+                        .width(350.dp)
+                        .height(300.dp)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "My Profile",
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(top = 10.dp)
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    AsyncImage(
+                        model = profileImageUrl,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, Color.Transparent, CircleShape)
+                            .clickable { launcher.launch("image/*") },
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        userName,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text(
+                        userEmail,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text(
+                        "Birthday: $userBirthday",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(60.dp))
+                }
+
+                Row(
+                    modifier = Modifier
+                        .width(260.dp)
+                        .padding(top = 280.dp)
+                        .background(buttonBlue, shape = RoundedCornerShape(12.dp))
+                        .fillMaxWidth(0.9f)
+                        .height(65.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProfileStat("$userWeight kg", "Weight")
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(2.dp)
+                            .padding(vertical = 8.dp),
+                        color = Color.White
+                    )
+                    ProfileStat("$userAge", "Years Old")
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(2.dp)
+                            .padding(vertical = 8.dp),
+                        color = Color.White
+                    )
+                    ProfileStat("$userHeight m", "Height")
                 }
             }
-        )
 
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .background(textBlue, RoundedCornerShape(30.dp))
-                    .width(350.dp)
-                    .height(300.dp)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    "My Profile",
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                AsyncImage(
-                    model = profileImageUrl,
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color.Transparent, CircleShape)
-                        .clickable { launcher.launch("image/*") },
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    userName,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Text(
-                    userEmail,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Text(
-                    "Birthday: $userBirthday",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+            Spacer(modifier = Modifier.height(40.dp))
 
-                Spacer(modifier = Modifier.height(60.dp))
-            }
-
-            Row(
-                modifier = Modifier
-                    .width(260.dp)
-                    .padding(top = 280.dp)
-                    .background(buttonBlue, shape = RoundedCornerShape(12.dp))
-                    .fillMaxWidth(0.9f)
-                    .height(65.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ProfileStat("$userWeight kg", "Weight")
-                Divider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(2.dp)
-                        .padding(vertical = 8.dp),
-                    color = Color.White
-                )
-                ProfileStat("$userAge", "Years Old")
-                Divider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(2.dp)
-                        .padding(vertical = 8.dp),
-                    color = Color.White
-                )
-                ProfileStat("$userHeight m", "Height")
-            }
+            ProfileOptionItem("Profile", Icons.Default.Person, onClick = { navController.navigate("updateProfile") }, isExpanded = false)
+            ProfileOptionItem("History", Icons.Default.History, onClick = { /* Navigate to History */ }, isExpanded = false)
+            ProfileOptionItem("Privacy Policy", Icons.Default.PrivacyTip, onClick = { /* Navigate to Privacy Policy */ }, isExpanded = false)
+            ProfileOptionItem("Settings", Icons.Default.Settings, onClick = { navController.navigate("settings") }, isExpanded = false)
+            ProfileOptionItem("Logout", Icons.Default.ExitToApp, onClick = { /* Handle Logout */ }, isExpanded = false)
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
-
-        ProfileOptionItem("Profile", Icons.Default.Person, onClick = { navController.navigate("updateProfile") }, isExpanded = false)
-        ProfileOptionItem("History", Icons.Default.History, onClick = { /* Navigate to History */ }, isExpanded = false)
-        ProfileOptionItem("Privacy Policy", Icons.Default.PrivacyTip, onClick = { /* Navigate to Privacy Policy */ }, isExpanded = false)
-        ProfileOptionItem("Settings", Icons.Default.Settings, onClick = { navController.navigate("settings") }, isExpanded = false)
-        ProfileOptionItem("Logout", Icons.Default.ExitToApp, onClick = { /* Handle Logout */ }, isExpanded = false)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
+        ) {
+            BottomNavigationBar(
+                currentPage = "profile",
+                onItemSelected = { page ->
+                    when (page) {
+                        "home" -> navController.navigate("home")
+                        "profile" -> navController.navigate("profile")
+                        "statistics" -> navController.navigate("statistics")
+                    }
+                },
+                navController = navController,
+                icons = listOf(
+                    painterResource(id = R.drawable.home_icon),
+                    painterResource(id = R.drawable.statistics_icon),
+                    painterResource(id = R.drawable.profile_icon)
+                )
+            )
+        }
     }
 }
-
 @Composable
 fun ProfileStat(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
