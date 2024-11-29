@@ -2,14 +2,14 @@ package com.example.uts_lec
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -25,16 +25,39 @@ import com.google.firebase.firestore.SetOptions
 
 @Composable
 fun GoalSelectionScreen(navController: NavHostController) {
-    var selectedGoal by remember { mutableStateOf("") }
-    var selectedActivityLevel by remember { mutableStateOf("") }
+    var selectedGoal by remember { mutableStateOf("Lose Weight") }
+    var selectedDifficulty by remember { mutableStateOf("Beginner") }
     val db = FirebaseFirestore.getInstance()
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)) {
+        // Top background image
         Image(
-            painter = painterResource(id = R.drawable.bawah_prehome3),
+            painter = painterResource(id = R.drawable.atas_prehome),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .align(Alignment.TopCenter)
+        )
+
+        // "Goal" text
+        Text(
+            text = "Goal",
+            fontSize = 36.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF11579D),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 120.dp)
+        )
+
+        // Bottom background image
+        Image(
+            painter = painterResource(id = R.drawable.bawah_prehome),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -42,58 +65,55 @@ fun GoalSelectionScreen(navController: NavHostController) {
                 .height(200.dp)
                 .align(Alignment.BottomCenter)
         )
-        // "Goal" and "Physical Activity Level" selection
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            // Goal selection
             Text(
-                text = "Goal",
-                fontSize = 36.sp,
+                text = "Select Your Goal",
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF11579D),
-                modifier = Modifier.padding(top = 18.dp)
+                color = Color(0xFF11579D)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Radio buttons for Goal selection
             RadioButtonGroup(
-                options = listOf("Lose Weight", "Gain Weight", "Muscle Mass Gain", "Shape Body", "Others"),
+                options = listOf("Lose Weight", "Build Muscle", "Improve Endurance"),
                 selectedOption = selectedGoal,
-                onOptionSelected = {
-                    selectedGoal = it
-                },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                onOptionSelected = { goal -> selectedGoal = goal }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // Difficulty selection
             Text(
-                text = "Physical Activity Level",
-                fontSize = 35.sp,
+                text = "Select Difficulty Level",
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF11579D),
-                modifier = Modifier.align(Alignment.CenterHorizontally) // Centering the text
+                color = Color(0xFF11579D)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Buttons for selecting activity level
-            ActivityLevelSelection(selectedActivityLevel) {
-                selectedActivityLevel = it
-            }
+            RadioButtonGroup(
+                options = listOf("Beginner", "Intermediate", "Advanced"),
+                selectedOption = selectedDifficulty,
+                onOptionSelected = { difficulty -> selectedDifficulty = difficulty }
+            )
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Continue Button at the bottom
             ContinueButton(onClick = {
                 if (userId != null) {
                     val userUpdates = hashMapOf(
                         "goal" to selectedGoal,
-                        "activityLevel" to selectedActivityLevel
+                        "difficulty" to selectedDifficulty
                     )
                     db.collection("users").document(userId)
                         .set(userUpdates, SetOptions.merge())
@@ -113,8 +133,8 @@ fun RadioButtonGroup(
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-        options.forEach { option ->
+    LazyColumn(modifier = modifier) {
+        items(options) { option ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
@@ -124,41 +144,14 @@ fun RadioButtonGroup(
             ) {
                 Text(
                     text = option,
-                    color = Color(0xFF1A73E8),
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
+                    color = if (option == selectedOption) Color.Black else Color.Gray,
                     modifier = Modifier.weight(1f)
                 )
                 RadioButton(
                     selected = option == selectedOption,
-                    onClick = { onOptionSelected(option) },
-                    colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF1A73E8))
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ActivityLevelSelection(selectedLevel: String, onLevelSelected: (String) -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        listOf("Beginner", "Intermediate", "Advance").forEach { level ->
-            Button(
-                onClick = {
-                    onLevelSelected(level)
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = if (selectedLevel == level) Color(0xFF1A73E8) else Color(0xFF11579D)),
-                shape = RoundedCornerShape(50),
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .height(40.dp)
-                    .width(130.dp)
-            ) {
-                Text(
-                    text = level,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    onClick = { onOptionSelected(option) }
                 )
             }
         }

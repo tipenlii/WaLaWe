@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.uts_lec.ui.theme.UTS_LECTheme
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage

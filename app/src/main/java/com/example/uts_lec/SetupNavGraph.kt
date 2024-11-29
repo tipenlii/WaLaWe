@@ -1,4 +1,3 @@
-// SetupNavGraph.kt
 package com.example.uts_lec
 
 import androidx.compose.runtime.Composable
@@ -15,9 +14,9 @@ fun SetupNavGraph(navController: NavHostController) {
         composable("sign_up") { SignUpScreen(navController = navController) }
         composable("home") { HomeScreen(navController = navController) }
         composable("Umur") { GenderAndAgeSelectionScreen(navController = navController) }
-        composable("Badan") {HeightAndWeightSelectionScreen(navController = navController) }
-        composable("Goal") {GoalSelectionScreen(navController = navController) }
-        composable("Perkenalan") {IntroductionScreen(navController = navController) }
+        composable("Badan") { HeightAndWeightSelectionScreen(navController = navController) }
+        composable("Goal") { GoalSelectionScreen(navController = navController) }
+        composable("Perkenalan") { IntroductionScreen(navController = navController) }
         composable("workout") { WorkoutCategoryScreen(navController = navController) }
         composable("workout_detail_screen/{day}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
@@ -39,7 +38,6 @@ fun SetupNavGraph(navController: NavHostController) {
             val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
             TransitionWorkoutScreen(navController = navController, day = day, exerciseNumber = exerciseNumber, workoutName = workoutName, category = category)
         }
-
         composable("workout_screen/{day}/{exerciseNumber}/{name}/{reps}/{imageRes}/{duration}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
@@ -59,18 +57,15 @@ fun SetupNavGraph(navController: NavHostController) {
 
             WorkoutScreen(navController = navController, workout = workout, day = day, category = category)
         }
-
-
         composable("confirm_done_screen/{day}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
             val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
             ConfirmDoneScreen(navController = navController, day = day, category = category)
         }
-
         composable("profile") { ProfileScreen(navController) }
         composable("updateProfile") { UpdateProfileScreen(navController) }
         composable("settings") { SettingsScreen(navController) }
         composable("password") { PasswordScreen(navController) }
-        composable("statistics") {StatisticsScreen(navController)  }
+        composable("statistics") { StatisticsScreen(navController) }
     }
 }

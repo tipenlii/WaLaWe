@@ -79,7 +79,6 @@ fun GenderAndAgeSelectionScreen(navController: NavHostController) {
             })
 
             ContinueButton(onClick = {
-                // Simpan data ke Firestore
                 if (userId != null) {
                     val userUpdates = hashMapOf(
                         "gender" to selectedGender,
