@@ -4,9 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -19,95 +22,84 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun WorkoutDetailScreen(navController: NavController, day: Int, category: String) {
-    val workouts = listOf(
-        Workout(
-            exerciseNumber = 1,
-            name = "Push Up",
-            reps = "20 x Reps",
-            imageRes = R.drawable.pushup,
-            duration = 120 // 2 menit atau disesuaikan dengan waktu yang diinginkan
-        ),
-        Workout(
-            exerciseNumber = 2,
-            name = "Plank",
-            reps = "1 Min",
-            imageRes = R.drawable.plank,
-            duration = 60 // 1 menit
-        ),
-        Workout(
-            exerciseNumber = 3,
-            name = "Both Side Plank",
-            reps = "1 Min",
-            imageRes = R.drawable.sideplank,
-            duration = 60 // 1 menit
-        ),
-        Workout(
-            exerciseNumber = 4,
-            name = "Abs Workout",
-            reps = "16 x Reps",
-            imageRes = R.drawable.abs,
-            duration = 90 // Durasi bisa disesuaikan
-        ),
-        Workout(
-            exerciseNumber = 5,
-            name = "Torso and Trap Workout",
-            reps = "8 x Reps",
-            imageRes = R.drawable.torsoandtraps,
-            duration = 60 // Durasi bisa disesuaikan
-        ),
-        Workout(
-            exerciseNumber = 6,
-            name = "Lower Back Exercise",
-            reps = "14 x Reps",
-            imageRes = R.drawable.lowerback,
-            duration = 80 // Durasi bisa disesuaikan
-        )
-    )
+    val db = FirebaseFirestore.getInstance()
+    val workouts = remember { mutableStateOf<List<Workout>>(emptyList()) }
+    val isLoading = remember { mutableStateOf(true) }
 
-    val currentWorkoutIndex = remember { mutableStateOf(0) }
+    // Mengambil data workout berdasarkan kategori dari Firestore
+    LaunchedEffect(category) {
+        db.collection("workouts")
+            .document("WeightLossBeginner")
+            .collection(category)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val workoutList = querySnapshot.documents.mapIndexed { index, document ->
+                        val reps = document.getLong("reps")?.toInt()
+                        val duration = document.getLong("duration")?.toInt()
 
-    // Gunakan Box untuk latar belakang warna putih
+                        Workout(
+                            exerciseNumber = index + 1,
+                            name = document.getString("name") ?: "Unknown",
+                            reps = reps,
+                            duration = duration,
+                            imageRes = getImageResourceId(document.getString("imageRes") ?: "")
+                        )
+                    }
+                    workouts.value = workoutList
+                }
+                isLoading.value = false
+            }
+            .addOnFailureListener {
+                isLoading.value = false
+            }
+    }
+
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White) // Menetapkan latar belakang putih
+            .fillMaxSize() // Mengisi seluruh ukuran layar
+            .background(Color.White)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize() // Menggunakan seluruh ukuran vertikal
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Teks Title
             Text(
                 text = "Day $day List",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // List Workout Card
-            workouts.forEach { workout ->
-                WorkoutCard(workout, onClick = {
-                    // Navigasi ke TutorialScreen dengan detail gerakan
-                    navController.navigate("tutorial_screen/${workout.name}")
-                })
+            if (isLoading.value) {
+                CircularProgressIndicator()
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f) // Menggunakan sisa ruang
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = 16.dp) // Memberikan ruang bawah pada LazyColumn
+                ) {
+                    itemsIndexed(workouts.value) { index, workout ->
+                        WorkoutCard(workout, onClick = {
+                            navController.navigate("tutorial_screen/${workout.exerciseNumber}/${category}")
+                        })
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Tombol Continue
             Button(
                 onClick = {
-                    if (currentWorkoutIndex.value < workouts.size) {
-                        val workout = workouts[currentWorkoutIndex.value]
-                        // Menambahkan parameter day ke dalam navigasi
-                        navController.navigate("transition_screen/$day/${currentWorkoutIndex.value + 1}/${workout.name}/$category")
-                        currentWorkoutIndex.value++ // Lanjutkan ke latihan berikutnya
+                    val currentWorkoutIndex = 0
+                    if (currentWorkoutIndex < workouts.value.size) {
+                        val workout = workouts.value[currentWorkoutIndex]
+                        navController.navigate("transition_screen/$day/${currentWorkoutIndex + 1}/${workout.name}/$category")
                     }
                 },
                 modifier = Modifier
@@ -123,8 +115,6 @@ fun WorkoutDetailScreen(navController: NavController, day: Int, category: String
         }
     }
 }
-
-
 
 @Composable
 fun WorkoutCard(workout: Workout, onClick: () -> Unit) {
@@ -153,7 +143,15 @@ fun WorkoutCard(workout: Workout, onClick: () -> Unit) {
 
             Column {
                 Text(text = workout.name, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text(text = workout.reps, fontSize = 14.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+
+                // Tampilkan reps jika ada, jika tidak tampilkan duration
+                workout.reps?.let {
+                    Text(text = "$it Reps", fontSize = 14.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+                }
+
+                workout.duration?.let {
+                    Text(text = "$it  Sec", fontSize = 14.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
+                }
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -170,7 +168,7 @@ fun WorkoutCard(workout: Workout, onClick: () -> Unit) {
 data class Workout(
     val exerciseNumber: Int,  // Nomor urutan latihan
     val name: String,         // Nama latihan (misalnya, Push Up)
-    val reps: String,         // Jumlah repetisi atau durasi (misalnya, 20 x Reps)
-    val imageRes: Int,        // Resource ID untuk gambar latihan
-    val duration: Int         // Durasi latihan dalam detik (misalnya, 120 detik)
+    val reps: Int?,           // Jumlah repetisi (misalnya, 20 x Reps) atau null jika menggunakan duration
+    val duration: Int?,       // Durasi latihan dalam detik (misalnya, 120 detik) atau null jika menggunakan reps
+    val imageRes: Int         // Resource ID untuk gambar latihan
 )

@@ -23,30 +23,49 @@ fun SetupNavGraph(navController: NavHostController) {
             val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
             WorkoutDetailScreen(navController = navController, day = day, category = category)
         }
+
         composable("workout_days_screen/{category}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
-            WorkoutDaysScreen(navController = navController, category = category ?: "Unknown")
+            category?.let {
+                WorkoutDaysScreen(navController = navController, category = it)
+            }
         }
-        composable("tutorial_screen/{exerciseNumber}") { backStackEntry ->
+        composable("tutorial_screen/{exerciseNumber}/{category}") { backStackEntry ->
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
-            TutorialScreen(navController = navController, exerciseNumber = exerciseNumber)
+            val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
+            TutorialScreen(navController = navController, exerciseNumber = exerciseNumber, category = category)
         }
+
         composable("transition_screen/{day}/{exerciseNumber}/{workoutName}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toInt() ?: 1
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
-            val workoutName = backStackEntry.arguments?.getString("workoutName") ?: "Unknown"
             val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
-            TransitionWorkoutScreen(navController = navController, day = day, exerciseNumber = exerciseNumber, workoutName = workoutName, category = category)
+            val workoutName = backStackEntry.arguments?.getString("workoutName") ?: "Unknown" // Ambil workoutName dari route
+
+            // Panggil TransitionWorkoutScreen dengan parameter yang benar
+            TransitionWorkoutScreen(
+                navController = navController,
+                day = day,
+                exerciseNumber = exerciseNumber,
+                category = category,
+                workoutName = workoutName // Kirimkan workoutName ke composable
+            )
         }
+
+
         composable("workout_screen/{day}/{exerciseNumber}/{name}/{reps}/{imageRes}/{duration}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
             val exerciseNumber = backStackEntry.arguments?.getString("exerciseNumber")?.toInt() ?: 1
             val name = backStackEntry.arguments?.getString("name") ?: "Unknown"
-            val reps = backStackEntry.arguments?.getString("reps") ?: ""
-            val imageRes = backStackEntry.arguments?.getString("imageRes")?.toInt() ?: R.drawable.chest_workout
-            val duration = backStackEntry.arguments?.getString("duration")?.toInt() ?: 0
+            val reps = backStackEntry.arguments?.getString("reps")?.toIntOrNull() ?: 0
+            val imageName = backStackEntry.arguments?.getString("imageRes") ?: "default_image"
+            val duration = backStackEntry.arguments?.getString("duration")?.toIntOrNull() ?: 0
             val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
 
+            // Gunakan fungsi getImageResourceId() untuk mengonversi nama gambar ke resource ID
+            val imageRes = getImageResourceId(imageName)
+
+            // Buat objek Workout
             val workout = Workout(
                 exerciseNumber = exerciseNumber,
                 name = name,
@@ -55,7 +74,8 @@ fun SetupNavGraph(navController: NavHostController) {
                 duration = duration
             )
 
-            WorkoutScreen(navController = navController, workout = workout, day = day, category = category)
+            // Panggil WorkoutScreen dengan data yang diperlukan
+            WorkoutScreen(navController = navController, workout = workout, day = day, category = category, exerciseNumber = exerciseNumber )
         }
         composable("confirm_done_screen/{day}/{category}") { backStackEntry ->
             val day = backStackEntry.arguments?.getString("day")?.toIntOrNull() ?: 1
