@@ -1,5 +1,6 @@
 package com.example.uts_lec
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -7,17 +8,27 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.launch
 
 @Composable
 fun ConfirmDoneScreen(navController: NavController, day: Int, category: String) {
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val coroutineScope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -29,7 +40,6 @@ fun ConfirmDoneScreen(navController: NavController, day: Int, category: String) 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Teks "Good Job"
             Text(
                 text = "Good Job!",
                 fontSize = 36.sp,
@@ -38,7 +48,6 @@ fun ConfirmDoneScreen(navController: NavController, day: Int, category: String) 
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Gambar yang menunjukkan selesai
             Image(
                 painter = painterResource(id = R.drawable.penguin_start2),
                 contentDescription = "Completed",
@@ -47,7 +56,6 @@ fun ConfirmDoneScreen(navController: NavController, day: Int, category: String) 
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Teks "Completed Exercise Day X"
             Text(
                 text = "Completed Exercise Day $day",
                 fontSize = 24.sp,
@@ -57,26 +65,32 @@ fun ConfirmDoneScreen(navController: NavController, day: Int, category: String) 
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Tombol "Continue" untuk kembali ke WorkoutDaysScreen
-            Button(
-                onClick = {
-                    // Perbarui status completedDays
-                    navController.previousBackStackEntry?.savedStateHandle?.set("completedDays", day + 1)
-                    // Kembali ke WorkoutDaysScreen dengan parameter kategori
-                    navController.navigate("workout_days_screen/$category") {
-                        popUpTo("workout_days_screen/$category") { inclusive = true }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xFF0A74DA),
-                    contentColor = Color.White
-                )
-            ) {
-                Text(text = "Continue", fontSize = 16.sp)
-            }
+            ContinueButton(onClick = {
+                if (userId != null) {
+                    val userUpdates = hashMapOf(
+                        "completedDays" to day + 1
+                    )
+                    db.collection("users").document(userId)
+                        .set(userUpdates, SetOptions.merge())
+                        .addOnSuccessListener {
+                            // Save history data
+                            val historyData = hashMapOf(
+                                "day" to day,
+                                "category" to category,
+                                "timestamp" to System.currentTimeMillis(),
+                                "reps" to 0, // Replace with actual reps
+                                "duration" to 0 // Replace with actual duration
+                            )
+                            db.collection("users").document(userId).collection("history")
+                                .add(historyData)
+                                .addOnSuccessListener {
+                                    navController.navigate("workout_days_screen/$category") {
+                                        popUpTo("workout_days_screen/$category") { inclusive = true }
+                                    }
+                                }
+                        }
+                }
+            })
         }
     }
 }

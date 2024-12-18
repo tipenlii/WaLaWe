@@ -164,7 +164,6 @@ fun WorkoutCard(workout: Workout, onClick: () -> Unit) {
         }
     }
 }
-
 data class Workout(
     val exerciseNumber: Int,  // Nomor urutan latihan
     val name: String,         // Nama latihan (misalnya, Push Up)
@@ -172,3 +171,4 @@ data class Workout(
     val duration: Int?,       // Durasi latihan dalam detik (misalnya, 120 detik) atau null jika menggunakan reps
     val imageRes: Int         // Resource ID untuk gambar latihan
 )
+

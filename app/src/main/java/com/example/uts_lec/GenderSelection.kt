@@ -45,7 +45,7 @@ fun GenderOption(gender: String, imageRes: Int, isSelected: Boolean, onGenderSel
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(10.dp)
             .clickable { onGenderSelected(gender) }
     ) {
         Text(
@@ -59,14 +59,17 @@ fun GenderOption(gender: String, imageRes: Int, isSelected: Boolean, onGenderSel
         )
         Box(
             modifier = Modifier
-                .background(if (isSelected) Color.LightGray else Color.White)
-                .clip(RoundedCornerShape(12.dp))
-                .padding(8.dp)
+                .size(180.dp) // Set size for the box
+                .clip(RoundedCornerShape(24.dp)) // Rounded corners for the box
+                .background(if (isSelected) Color(0xFF80BBFF) else Color(0xFFF5F5F5)) // Change background color based on selection // Change background color based on selection
+                .padding(16.dp)
         ) {
             Image(
                 painter = painterResource(id = imageRes),
                 contentDescription = null,
-                modifier = Modifier.size(120.dp) // Increase image size
+                modifier = Modifier
+                    .fillMaxSize() // Fill the available space in the box
+                    .clip(RoundedCornerShape(20.dp)) // Add rounded corners to the image itself
             )
         }
     }

@@ -23,6 +23,8 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+firebase-storage-ktx = "com.google.firebase:firebase-storage-ktx:20.2.1"
+mpandroidchart = "com.github.PhilJay:MPAndroidChart:3.1.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -61,6 +61,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
+    implementation(libs.mpandroidchart)
+
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
     val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -104,6 +108,15 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-pager:0.30.1")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.30.1")
+
+    implementation ("androidx.compose.ui:ui:1.6.0") // Replace with the latest stable version
+    implementation ("androidx.compose.material:material:1.6.0")
+    implementation ("androidx.compose.ui:ui-tooling:1.6.0")
+
+    implementation ("androidx.compose.ui:ui-graphics:1.x.x")
+    implementation ("androidx.compose.foundation:foundation:1.x.x")
+    implementation ("androidx.compose.material3:material3:1.x.x")
+    implementation ("androidx.navigation:navigation-compose:2.x.x")
 
     debugImplementation ("androidx.compose.ui:ui-tooling:1.5.3")
 

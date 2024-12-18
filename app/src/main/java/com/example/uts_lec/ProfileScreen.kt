@@ -192,7 +192,7 @@ fun ProfileScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(40.dp))
 
             ProfileOptionItem("Profile", Icons.Default.Person, onClick = { navController.navigate("updateProfile") }, isExpanded = false)
-            ProfileOptionItem("History", Icons.Default.History, onClick = { /* Navigate to History */ }, isExpanded = false)
+            ProfileOptionItem("History", Icons.Default.History, onClick = { navController.navigate("history_category_screen") }, isExpanded = false)
             ProfileOptionItem("Privacy Policy", Icons.Default.PrivacyTip, onClick = { /* Navigate to Privacy Policy */ }, isExpanded = false)
             ProfileOptionItem("Settings", Icons.Default.Settings, onClick = { navController.navigate("settings") }, isExpanded = false)
             ProfileOptionItem("Logout", Icons.Default.ExitToApp, onClick = {

@@ -1,5 +1,6 @@
 package com.example.uts_lec
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,87 +18,71 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun WorkoutDaysScreen(navController: NavController, category: String) {
-    val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
-    var completedDays by rememberSaveable { mutableStateOf(savedStateHandle?.get("completedDays") ?: 1) } // Hari yang sudah selesai, default Day 1 terbuka
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    var completedDays by rememberSaveable { mutableStateOf(1) } // Default Day 1 terbuka
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-    // Gunakan Box untuk menampilkan background image dan konten utama
+    // Mengambil data completedDays dari Firestore
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            db.collection("users").document(userId).get().addOnSuccessListener { document ->
+                if (document != null) {
+                    completedDays = document.getLong("completedDays")?.toInt() ?: 1
+                    Log.d("WorkoutDaysScreen", "CompletedDays updated to $completedDays")
+                }
+            }
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Image
         Image(
-            painter = painterResource(id = R.drawable.background_workout), // Ganti dengan gambar background Anda
+            painter = painterResource(id = R.drawable.background_workout),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
 
-        // Konten utama (judul, daftar hari, dsb.)
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Teks Title untuk kategori olahraga yang dinamis berdasarkan argumen category
             Text(
                 text = "$category Workout",
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF0A74DA),
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally) // Memastikan teks berada di tengah secara horizontal
-                    .padding(top = 72.dp, bottom = 16.dp) // Menambahkan padding top dan bottom
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 72.dp, bottom = 16.dp)
             )
 
-            // Daftar hari olahraga
-            WorkoutDayItem(
-                day = 1,
-                isUnlocked = true, // Hari pertama selalu terbuka
-                isCompleted = completedDays > 1, // Hari pertama dianggap selesai jika completedDays lebih dari 1
-                description = "Ready to build a strong foundation for your $category muscles? This beginner-friendly $category workout is perfect for those just starting their fitness journey.",
-                onStartClick = {
-                    navController.navigate("workout_detail_screen/1/$category") // Navigasi ke workout detail screen untuk Day 1
-                }
-            )
-
-            WorkoutDayItem(
-                day = 2,
-                isUnlocked = completedDays >= 2, // Terbuka jika hari 1 sudah selesai
-                isCompleted = completedDays > 2,
-                description = "This beginner $category workout is perfect if you're looking to improve both your strength and posture.",
-                onStartClick = {
-                    if (completedDays >= 2) {
-                        navController.navigate("workout_detail_screen/2/$category") // Navigasi ke workout detail screen untuk Day 2
+            // Daftar Workout Days
+            for (day in 1..4) {
+                WorkoutDayItem(
+                    day = day,
+                    isUnlocked = completedDays >= day,
+                    isCompleted = completedDays > day,
+                    description = when (day) {
+                        1 -> "Ready to build a strong foundation for your $category muscles? This beginner-friendly $category workout is perfect for those just starting their fitness journey."
+                        2 -> "This beginner $category workout is perfect if you're looking to improve both your strength and posture."
+                        else -> "No gym? No problem! This beginner $category workout can be done anywhere, with no equipment needed."
+                    },
+                    onStartClick = {
+                        if (completedDays >= day) {
+                            navController.navigate("workout_detail_screen/$day/$category")
+                        }
                     }
-                }
-            )
-
-            WorkoutDayItem(
-                day = 3,
-                isUnlocked = completedDays >= 3, // Terbuka jika hari 2 sudah selesai
-                isCompleted = completedDays > 3,
-                description = "No gym? No problem! This beginner $category workout can be done anywhere, with no equipment needed.",
-                onStartClick = {
-                    if (completedDays >= 3) {
-                        navController.navigate("workout_detail_screen/3/$category") // Navigasi ke workout detail screen untuk Day 3
-                    }
-                }
-            )
-
-            WorkoutDayItem(
-                day = 4,
-                isUnlocked = completedDays >= 4, // Terbuka jika hari 3 sudah selesai
-                isCompleted = completedDays > 4,
-                description = "No gym? No problem! This beginner $category workout can be done anywhere, with no equipment needed.",
-                onStartClick = {
-                    if (completedDays >= 4) {
-                        navController.navigate("workout_detail_screen/4/$category") // Navigasi ke workout detail screen untuk Day 4
-                    }
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -145,7 +130,7 @@ fun WorkoutDayItem(
                     text = description,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 4.dp),
-                    textAlign = TextAlign.Justify // Menambahkan alignment justify
+                    textAlign = TextAlign.Justify
                 )
 
                 // Tombol "Start Now" atau tanda "Done"
@@ -168,7 +153,6 @@ fun WorkoutDayItem(
                         }
                     }
                 } else {
-                    // Menampilkan ikon terkunci jika hari masih terkunci
                     Icon(
                         painter = painterResource(id = R.drawable.ic_lock),
                         contentDescription = "Locked",
