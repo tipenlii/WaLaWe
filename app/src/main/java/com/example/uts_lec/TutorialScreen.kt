@@ -42,13 +42,12 @@ fun TutorialScreen(navController: NavController, exerciseNumber: Int, category: 
                     val reps = documentSnapshot.getLong("reps")?.toInt()
                     val duration = documentSnapshot.getLong("duration")?.toInt()
                     val desc = documentSnapshot.getString("desc") // Ambil deskripsi
-
                     workout.value = Workout(
                         exerciseNumber = exerciseNumber,
                         name = documentSnapshot.getString("name") ?: "Unknown",
                         reps = reps,
                         duration = duration,
-                        imageRes = getImageResourceId(documentSnapshot.getString("imageRes") ?: "")
+                        imageRes = getImageResourceId(documentSnapshot.getString("imageRes") ?: ""),
                     )
 
                     workoutDesc.value = desc // Simpan deskripsi yang diambil

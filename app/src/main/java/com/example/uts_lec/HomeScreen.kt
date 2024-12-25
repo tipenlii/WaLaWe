@@ -22,10 +22,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val db = FirebaseFirestore.getInstance()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid
+    val totalCalories = remember { mutableStateOf(0) }
+    val totalDuration = remember { mutableStateOf(0) } // Tambahkan variabel untuk total durasi
+    val daysProgress = remember { mutableStateOf(1) } // Default to 1
+    val workoutDB = remember{ mutableStateOf(0) }
+    val currentDate = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+    // Fetch total calories, total duration, and days progress from Firestore
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            db.collection("users")
+                .document(userId)
+                .collection("CaloriesPerDay").document(currentDate)
+                .get().addOnSuccessListener { document ->
+                if (document != null) {
+                    totalCalories.value = document.getLong("Calories")?.toInt() ?: 0
+                    totalDuration.value = document.getLong("duration")?.toInt() ?: 0 // Ambil total durasi dari Firestore
+                    daysProgress.value = document.getLong("completedDays")?.toInt() ?: 1
+                    workoutDB.value = document.getLong("exercise")?.toInt() ?: 1
+                }
+            }
+        }
+    }
+
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    savedStateHandle?.getLiveData<Int>("day")?.observe(navController.currentBackStackEntry!!) { day ->
+        daysProgress.value = day
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.White)) {
@@ -33,20 +64,8 @@ fun HomeScreen(navController: NavController) {
         val calendar = Calendar.getInstance()
         val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault())
         val currentYear = calendar.get(Calendar.YEAR)
-        val daysOfWeek = listOf("M", "T", "W", "T", "F", "S", "S")
-
-        // Calculate the dates of the current week
-        val today = Calendar.getInstance()
-        val datesOfWeek = (0..6).map {
-            val day = Calendar.getInstance().apply {
-                time = today.time
-                add(Calendar.DAY_OF_MONTH, it - today.get(Calendar.DAY_OF_WEEK) + 2) // Adjusting to Monday start
-            }
-            day.get(Calendar.DAY_OF_MONTH)
-        }
 
         // Progress for penguin image (adjust this based on your app logic)
-        val daysProgress = remember { mutableStateOf(10) } // Example: 45th day of workout
         val penguinResId = when {
             daysProgress.value < 20 -> R.drawable.penguin_1 // Replace with actual penguin images
             daysProgress.value < 40 -> R.drawable.penguin_2
@@ -56,15 +75,6 @@ fun HomeScreen(navController: NavController) {
         }
 
         // Top background image
-        Image(
-            painter = painterResource(id = R.drawable.backhome),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .align(Alignment.TopCenter)
-        )
 
         // Main content
         Column(
@@ -84,48 +94,8 @@ fun HomeScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Calendar Days (M, T, W...)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 13.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                daysOfWeek.forEach { day ->
-                    Text(
-                        text = day,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                }
-            }
-
-            // Calendar Dates (real-time)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                datesOfWeek.forEachIndexed { index, date ->
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (index == today.get(Calendar.DAY_OF_WEEK) - 2) Color(0xFF11579D) else Color.Transparent
-                            )
-                            .size(25.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "$date",
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center,
-                            color = Color.White // Highlight current day
-                        )
-                    }
-                }
-            }
+            // Calendar View
+            CalendarView()
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -158,7 +128,7 @@ fun HomeScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxHeight()
                             .width((daysProgress.value * 2.5).dp) // Adjust width based on your logic (max 100 days = 250.dp)
-                            .background(Color.Green)
+                            .background(Color.Blue)
                     )
                 }
             }
@@ -166,7 +136,9 @@ fun HomeScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(25.dp))
 
             // Overview Section
-            OverviewSection()
+            val hours = totalDuration.value / 3600
+            val minutes = (totalDuration.value % 3600) / 60
+            OverviewSection(totalCalories.value, hours, minutes, workoutDB.value)
 
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -201,7 +173,81 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-fun OverviewSection() {
+fun CalendarView() {
+    val daysOfWeek = listOf("M", "T", "W", "T", "F", "S", "S")
+    val today = Calendar.getInstance()
+    val datesOfWeek = (0..6).map {
+        val day = Calendar.getInstance().apply {
+            time = today.time
+            add(Calendar.DAY_OF_MONTH, it - today.get(Calendar.DAY_OF_WEEK) + 2) // Adjusting to Monday start
+        }
+        day.get(Calendar.DAY_OF_MONTH)
+    }
+
+    Box(
+        modifier = Modifier
+            .width(420.dp)
+            .height(75.dp)
+            .clip(RoundedCornerShape(20.dp))
+    ) {
+        // Background image
+        Image(
+            painter = painterResource(id = R.drawable.calendar), // Replace with your actual image resource
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Calendar Days (M, T, W...)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                daysOfWeek.forEach { day ->
+                    Text(
+                        text = day,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                }
+            }
+
+            // Calendar Dates (real-time)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                datesOfWeek.forEachIndexed { index, date ->
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (index == today.get(Calendar.DAY_OF_WEEK) - 2) Color(0xFF11579D) else Color.Transparent
+                            )
+                            .size(25.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$date",
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color.White // Highlight current day
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OverviewSection(totalCalories: Int, hours: Int, minutes: Int, workoutDB: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,9 +266,9 @@ fun OverviewSection() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            OverviewCard("0", "Cal Burnt", R.drawable.cal_burnt_icon)
-            OverviewCard("0h", "Total Time", R.drawable.total_time_icon)
-            OverviewCard("0", "Exercises", R.drawable.exercises_icon)
+            OverviewCard(totalCalories.toString(), "Cal Burnt", R.drawable.cal_burnt_icon)
+            OverviewCard("${hours}h ${minutes}m", "Total Time", R.drawable.total_time_icon) // Tampilkan total durasi
+            OverviewCard(workoutDB.toString(), "Exercises", R.drawable.exercises_icon)
         }
     }
 }

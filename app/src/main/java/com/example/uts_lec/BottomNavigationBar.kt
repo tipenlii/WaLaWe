@@ -1,6 +1,7 @@
 package com.example.uts_lec
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,10 +33,11 @@ fun BottomNavigationBar(
     BottomAppBar(
         modifier = Modifier
             .clip(RoundedCornerShape(30.dp))
-            .background(Color.Transparent)
             .height(56.dp)
             .width(320.dp)
             .shadow(10.dp, RoundedCornerShape(60.dp))
+            .border(0.3.dp, Color.LightGray, RoundedCornerShape(30.dp)), // Corrected border modifier
+        containerColor = Color.White // Set the background color to white
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
