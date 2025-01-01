@@ -1,35 +1,24 @@
-# Aplikasi UTS LEC
+# Aplikasi Walawe
+## Anggota Kelompok
+
+Kelompok 3 WaLaWe:
+Owen Christian Cahyadi (00000067055)
+Steven Lie (00000069236)
+Wency Yvonney Wijaya (00000071833)
 
 ## Gambaran Umum
 
-Aplikasi UTS LEC adalah aplikasi pelacakan kebugaran dan latihan yang dibangun menggunakan Kotlin dan Jetpack Compose. Aplikasi ini terintegrasi dengan Firebase untuk autentikasi dan Firestore untuk penyimpanan data. Aplikasi ini memungkinkan pengguna untuk memperbarui profil mereka, melacak kemajuan latihan mereka, dan melihat konten motivasi.
+Aplikasi Walawe adalah aplikasi yang bergerak dibidang olahraga untuk membantu user memudahkan hari hari workout dengan tampilan yang mudah. Pelacakan kebugaran dan latihan yang dibangun menggunakan Kotlin dan Jetpack Compose. Aplikasi ini terintegrasi dengan Firebase untuk autentikasi dan Firestore untuk penyimpanan data seperti daftar workout, profile user, . Aplikasi ini memungkinkan pengguna untuk memperbarui profil mereka, melacak kemajuan latihan mereka, dan melihat konten motivasi. 
 
 ## Fitur
 
 - **Autentikasi Pengguna**: Masuk dan daftar menggunakan Firebase Authentication.
 - **Manajemen Profil**: Memperbarui informasi profil termasuk nama lengkap, nomor ponsel, tanggal lahir, berat badan, dan tinggi badan.
-- **Pelacakan Latihan**: Melacak kemajuan latihan dengan indikator visual dan konten motivasi.
+- **Pelacakan Latihan**: Melacak kemajuan latihan dengan indikator visual, seperti kalori, waktu, jumlah exercise, bar chart kalori per hari.
 - **Navigasi**: Navigasi mulus antara berbagai layar menggunakan Jetpack Navigation.
-
-## Layar
-
-- **StartUpScreen**: Layar awal yang ditampilkan kepada pengguna.
-- **OnboardingScreen**: Proses onboarding untuk pengguna baru.
-- **SignInScreen**: Layar masuk pengguna.
-- **SignUpScreen**: Layar daftar pengguna.
-- **StatisticsScreen**: Layar menjelaskan ringkasan singkat dan statistik olahraga yang telah dilakukan selama user menggunakan aplikasi
-- **HomeScreen**: Layar utama yang menampilkan kemajuan latihan dan konten motivasi.
-- **ProfileScreen**: Layar profil pengguna yang menampilkan informasi pribadi.
-- **UpdateProfileScreen**: Layar untuk memperbarui informasi profil pengguna.
-- **SettingsScreen**: Layar pengaturan aplikasi.
-- **PasswordScreen**: Layar untuk mengubah kata sandi pengguna.
-- **WorkoutCategoryScreen**: Layar yang menampilkan berbagai kategori latihan.
-- **WorkoutDetailScreen**: Tampilan detail dari latihan tertentu.
-- **WorkoutDaysScreen**: Layar yang menampilkan hari-hari latihan untuk kategori tertentu.
-- **TutorialScreen**: Tutorial untuk latihan.
-- **TransitionWorkoutScreen**: Layar transisi antara latihan.
-- **WorkoutScreen**: Layar yang menampilkan detail latihan.
-- **ConfirmDoneScreen**: Layar yang mengonfirmasi penyelesaian latihan.
+- **List Workout**: Menjalankan workout dari berbagai kategori yang sudah terintegrasi dari firebase, setelah selesai melakukan semua workout pada hari itu, maka hari berikutnya baru terunlock.
+- **History**: Menampilkan progres workout yang sudah dilakukan oleh user.
+- **Native**: Menggunakan camera dan galery untuk mengambil gambar sebagai profile user dan terintegrasi dengand firebase.
 
 ## Navigasi
 
