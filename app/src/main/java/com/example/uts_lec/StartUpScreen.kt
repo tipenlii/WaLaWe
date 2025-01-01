@@ -83,7 +83,7 @@ fun StartUpScreen(navController: NavHostController) {
 fun checkProfileCompletion(documentSnapshot: com.google.firebase.firestore.DocumentSnapshot): Boolean {
     // Daftar field yang harus diisi  
     val requiredFields = listOf(
-        "activityLevel",
+        "classification",
         "age",
         "gender",
         "goal",

@@ -46,7 +46,7 @@ fun HomeScreen(navController: NavController) {
                     totalCalories.value = document.getLong("Calories")?.toInt() ?: 0
                     totalDuration.value = document.getLong("duration")?.toInt() ?: 0 // Ambil total durasi dari Firestore
                     daysProgress.value = document.getLong("completedDays")?.toInt() ?: 1
-                    workoutDB.value = document.getLong("exercise")?.toInt() ?: 1
+                    workoutDB.value = document.getLong("exercise")?.toInt() ?: 0
                 }
             }
         }

@@ -225,8 +225,9 @@ fun checkRequiredFields(documentSnapshot: DocumentSnapshot): Boolean {
         "gender",
         "height",
         "weight",
-        "activityLevel",
+        "classification",
         "goal"
+
     )
 
     // Periksa apakah semua field ada dan tidak null
@@ -242,11 +243,12 @@ fun navigateToIncompleteProfileScreen(
 ) {
     // Tentukan urutan halaman pengisian
     val profileCompletionSteps = listOf(
+
         "age" to "Umur",
         "gender" to "Umur",
         "height" to "Badan",
         "weight" to "Badan",
-        "activityLevel" to "Goal",
+        "classification" to "Goal",
         "goal" to "Goal"
     )
 

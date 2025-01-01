@@ -77,5 +77,11 @@ fun SetupNavGraph(navController: NavHostController) {
         composable("password") { PasswordScreen(navController) }
         composable("statistics") { StatisticsScreen(navController) }
         composable("history_move") { HistoryMoveScreen(navController = navController) }
+        composable("history_category_screen") { HistoryCategoryScreen(navController = navController) }
+
+        composable("history_workout_screen/{category}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: "Unknown"
+            HistoryWorkoutScreen(navController = navController, category = category)
+        }
     }
 }

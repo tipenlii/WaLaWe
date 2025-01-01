@@ -109,19 +109,19 @@ fun GoalSelectionScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            ContinueButton(onClick = {
-                if (userId != null) {
-                    val userUpdates = hashMapOf(
-                        "goal" to selectedGoal,
-                        "difficulty" to selectedDifficulty
-                    )
-                    db.collection("users").document(userId)
-                        .set(userUpdates, SetOptions.merge())
-                        .addOnSuccessListener {
-                            navController.navigate("Perkenalan")
-                        }
-                }
-            })
+                ContinueButton(onClick = {
+                    if (userId != null) {
+                        val userUpdates = hashMapOf(
+                            "goal" to selectedGoal,
+                            "difficulty" to selectedDifficulty
+                        )
+                        db.collection("users").document(userId)
+                            .set(userUpdates, SetOptions.merge())
+                            .addOnSuccessListener {
+                                navController.navigate("Perkenalan")
+                            }
+                    }
+                })
         }
     }
 }

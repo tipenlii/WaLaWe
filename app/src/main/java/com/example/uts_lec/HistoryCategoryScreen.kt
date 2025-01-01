@@ -1,5 +1,6 @@
 package com.example.uts_lec
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,17 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun WorkoutCategoryScreen(navController: NavController) {
+fun HistoryCategoryScreen(navController: NavController) {
     var selectedCategory by remember { mutableStateOf("") } // State untuk melacak kategori yang dipilih
+    val categories = listOf("Leg", "Arm", "Chest", "Abs")
 
     // Konten utama
     Column(
@@ -30,7 +34,7 @@ fun WorkoutCategoryScreen(navController: NavController) {
     ) {
         // Teks Title
         Text(
-            text = "Category",
+            text = "History Category",
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -42,7 +46,7 @@ fun WorkoutCategoryScreen(navController: NavController) {
         // Teks deskripsi
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Choose one of the focused exercises",
+            text = "Choose the category to view history",
             fontSize = 16.sp,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -50,7 +54,7 @@ fun WorkoutCategoryScreen(navController: NavController) {
             color = Color(0xFF0A74DA) // Warna biru
         )
 
-        // Membuat 2 baris dengan 2 kolom (4 kotak)
+        // Membuat 2 baris dengan 2 kolom (4 kategori)
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -61,9 +65,8 @@ fun WorkoutCategoryScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                WorkoutCard(
+                HistoryCategoryCard(
                     title = "Leg Workout",
-                    time = "23 min remaining",
                     imageRes = R.drawable.leg_workout,
                     isSelected = selectedCategory == "Leg", // Tanda apakah card dipilih
                     onClick = { selectedCategory = "Leg" },  // Set kategori terpilih
@@ -72,9 +75,8 @@ fun WorkoutCategoryScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                WorkoutCard(
+                HistoryCategoryCard(
                     title = "Arm Exercise",
-                    time = "23 min remaining",
                     imageRes = R.drawable.strength_workout,
                     isSelected = selectedCategory == "Arm", // Tanda apakah card dipilih
                     onClick = { selectedCategory = "Arm" }, // Set kategori terpilih
@@ -89,9 +91,8 @@ fun WorkoutCategoryScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                WorkoutCard(
+                HistoryCategoryCard(
                     title = "Chest Workout",
-                    time = "15 min remaining",
                     imageRes = R.drawable.chest_workout,
                     isSelected = selectedCategory == "Chest", // Tanda apakah card dipilih
                     onClick = { selectedCategory = "Chest" }, // Set kategori terpilih
@@ -100,9 +101,8 @@ fun WorkoutCategoryScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                WorkoutCard(
+                HistoryCategoryCard(
                     title = "Abs Workout",
-                    time = "15 min remaining",
                     imageRes = R.drawable.abs_workout,
                     isSelected = selectedCategory == "Abs", // Tanda apakah card dipilih
                     onClick = { selectedCategory = "Abs" }, // Set kategori terpilih
@@ -113,11 +113,11 @@ fun WorkoutCategoryScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Button untuk melanjutkan ke halaman detail workout
+        // Button untuk melanjutkan ke halaman detail history berdasarkan kategori
         Button(
             onClick = {
                 if (selectedCategory.isNotEmpty()) {
-                    navController.navigate("workout_days_screen/$selectedCategory")
+                    navController.navigate("history_workout_screen/$selectedCategory")
                 }
             },
             modifier = Modifier
@@ -135,9 +135,8 @@ fun WorkoutCategoryScreen(navController: NavController) {
 }
 
 @Composable
-fun WorkoutCard(
+fun HistoryCategoryCard(
     title: String,
-    time: String,
     imageRes: Int,
     isSelected: Boolean, // Parameter untuk menentukan apakah card dipilih
     onClick: () -> Unit,
@@ -168,7 +167,6 @@ fun WorkoutCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(text = title, fontSize = 16.sp)
-            Text(text = time, fontSize = 12.sp, color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f))
         }
     }
 }

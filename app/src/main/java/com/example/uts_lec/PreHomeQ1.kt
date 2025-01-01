@@ -78,6 +78,8 @@ fun GenderAndAgeSelectionScreen(navController: NavHostController) {
                 selectedAge = age
             })
 
+            // Pushes the button to the bottom
+
             ContinueButton(onClick = {
                 if (userId != null) {
                     val userUpdates = hashMapOf(

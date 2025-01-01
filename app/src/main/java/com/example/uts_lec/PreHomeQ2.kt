@@ -156,14 +156,14 @@ fun HeightAndWeightSelectionScreen(navController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(15.dp))
         }
 
         // Add Continue Button at the bottom
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(8.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             ContinueButton(onClick = {
